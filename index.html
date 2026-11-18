@@ -1,0 +1,812 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <title>GPA Calculator</title>
+
+  <!-- iOS Web App -->
+  <meta name="theme-color" content="#f6f5f1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="GPA Calculator">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="GPA Calculator">
+  <meta name="description" content="Calculate your anticipated cumulative GPA.">
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" sizes="1024x1024" href="./icon.png">
+  <link rel="icon" type="image/png" href="./icon.png">
+
+  <style>
+      :root {
+          --bg: #f6f5f1;
+          --card: #ffffff;
+          --ink: #202c38;
+          --muted: #7c8790;
+          --accent: #317c77;
+          --accent-dark: #24615d;
+          --accent-soft: #eaf3f0;
+          --line: #e5e8e5;
+          --error: #b83d43;
+      }
+
+      * {
+          box-sizing: border-box;
+          -webkit-tap-highlight-color: transparent;
+      }
+
+      html {
+          scroll-behavior: smooth;
+      }
+
+      body {
+          margin: 0;
+          min-height: 100vh;
+          min-height: 100dvh;
+          background: var(--bg);
+          color: var(--ink);
+          font-family: -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+      }
+
+      button, input, select {
+          font: inherit;
+      }
+
+      #container {
+          width: 100%;
+          max-width: 680px;
+          margin: 0 auto;
+          padding:
+                  calc(45px + env(safe-area-inset-top))
+                  22px
+                  calc(65px + env(safe-area-inset-bottom));
+      }
+
+      /* Header */
+
+      .header {
+          margin-bottom: 36px;
+      }
+
+      .headerTop {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 34px;
+      }
+
+      .brand {
+          display: flex;
+          align-items: center;
+          gap: 11px;
+          font-size: 14px;
+          font-weight: 750;
+      }
+
+      .brandMark {
+          width: 39px;
+          height: 39px;
+          border-radius: 10px;
+          object-fit: cover;
+      }
+
+      .scaleBadge {
+          border: 1px solid #d8e2de;
+          border-radius: 20px;
+          padding: 8px 13px;
+          color: var(--accent);
+          font-size: 11px;
+          font-weight: 750;
+          letter-spacing: .6px;
+      }
+
+      .eyebrow {
+          color: var(--accent);
+          font-size: 11px;
+          font-weight: 750;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          margin-bottom: 13px;
+      }
+
+      h1 {
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: clamp(38px, 7vw, 49px);
+          font-weight: 500;
+          letter-spacing: -1.8px;
+          line-height: 1.1;
+          margin: 0 0 15px;
+      }
+
+      .subtitle {
+          font-size: 14px;
+          color: var(--muted);
+          line-height: 1.7;
+          margin: 0;
+      }
+
+      .headerLine {
+          width: 46px;
+          height: 3px;
+          background: var(--accent);
+          border-radius: 3px;
+          margin-top: 24px;
+      }
+
+      /* Cards */
+
+      .card {
+          background: var(--card);
+          border: 1px solid var(--line);
+          border-radius: 16px;
+          padding: 28px;
+          margin-bottom: 18px;
+          box-shadow: 0 5px 25px rgba(32,44,56,.035);
+      }
+
+      .cardHeader {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          margin-bottom: 26px;
+      }
+
+      .sectionNumber {
+          width: 37px;
+          height: 37px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          background: var(--accent-soft);
+          color: var(--accent);
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 750;
+      }
+
+      .sectionTitle {
+          font-size: 17px;
+          font-weight: 750;
+          letter-spacing: -.4px;
+          margin: 0 0 4px;
+      }
+
+      .sectionDescription {
+          font-size: 12px;
+          color: var(--muted);
+          margin: 0;
+      }
+
+      /* Inputs */
+
+      .inputGroup {
+          margin-bottom: 21px;
+      }
+
+      .inputGrid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+      }
+
+      label {
+          display: block;
+          font-size: 12px;
+          font-weight: 700;
+          color: #4a5963;
+          margin-bottom: 9px;
+      }
+
+      input, select {
+          display: block;
+          width: 100%;
+          min-width: 0;
+          height: 49px;
+          padding: 0 14px;
+          border: 1px solid #dfe5e3;
+          border-radius: 9px;
+          background: #fafbf9;
+          color: var(--ink);
+          font-size: 16px;
+          outline: none;
+          transition: border-color .2s, box-shadow .2s;
+      }
+
+      input::placeholder {
+          color: #adb5b4;
+      }
+
+      input:focus, select:focus {
+          background: white;
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px rgba(49,124,119,.09);
+      }
+
+      /* Buttons */
+
+      button {
+          min-height: 49px;
+          border-radius: 9px;
+          padding: 12px 22px;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: background .2s, transform .15s;
+          touch-action: manipulation;
+      }
+
+      button:active {
+          transform: scale(.985);
+      }
+
+      .primaryButton {
+          border: 1px solid var(--accent);
+          background: var(--accent);
+          color: white;
+      }
+
+      .primaryButton:hover {
+          background: var(--accent-dark);
+      }
+
+      #createBtn {
+          width: 100%;
+      }
+
+      .secondaryButton {
+          background: white;
+          color: var(--ink);
+          border: 1px solid var(--line);
+      }
+
+      .secondaryButton:hover {
+          background: #f4f6f4;
+      }
+
+      /* Courses */
+
+      #coursePanel {
+          display: none;
+      }
+
+      .courseCard {
+          background: #fafbf9;
+          border: 1px solid var(--line);
+          border-radius: 11px;
+          padding: 19px;
+          margin-bottom: 13px;
+      }
+
+      .courseHeading {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 16px;
+      }
+
+      .courseTitle {
+          font-size: 14px;
+          font-weight: 750;
+      }
+
+      .courseIndex {
+          color: var(--accent);
+          background: var(--accent-soft);
+          border-radius: 6px;
+          padding: 5px 9px;
+          font-size: 11px;
+          font-weight: 750;
+      }
+
+      .courseFields {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+      }
+
+      .courseFields .inputGroup {
+          margin-bottom: 0;
+      }
+
+      /* Actions */
+
+      #actionButtons {
+          display: none;
+          gap: 12px;
+          margin: 22px 0;
+      }
+
+      #calculateBtn {
+          flex: 2;
+      }
+
+      #clearBtn {
+          flex: 1;
+      }
+
+      #errorMsg {
+          color: var(--error);
+          font-size: 13px;
+          line-height: 1.5;
+          margin: 14px 0 0;
+      }
+
+      #errorMsg:empty {
+          display: none;
+      }
+
+      /* Result */
+
+      #resultCard {
+          display: none;
+          background: #eaf3f0;
+          border: 1px solid #cddfd9;
+          border-radius: 16px;
+          padding: 35px 25px;
+          text-align: center;
+          margin-top: 15px;
+      }
+
+      .resultLabel {
+          color: #577d73;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 1.7px;
+          text-transform: uppercase;
+      }
+
+      .resultValue {
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 76px;
+          line-height: 1.2;
+          letter-spacing: -3px;
+          color: var(--accent-dark);
+          margin: 14px 0 4px;
+      }
+
+      .resultScale {
+          color: #72928a;
+          font-size: 13px;
+      }
+
+      .resultRule {
+          width: 55px;
+          height: 1px;
+          background: #b9d2c9;
+          margin: 25px auto 18px;
+      }
+
+      .resultNote {
+          font-size: 12px;
+          color: #66847c;
+          line-height: 1.6;
+      }
+
+      .footer {
+          text-align: center;
+          color: #a0aaa5;
+          font-size: 11px;
+          margin-top: 35px;
+          letter-spacing: .5px;
+      }
+
+      /* iPhone Layout */
+
+      @media (max-width: 480px) {
+          #container {
+              padding:
+                      calc(25px + env(safe-area-inset-top))
+                      16px
+                      calc(45px + env(safe-area-inset-bottom));
+          }
+
+          .headerTop {
+              margin-bottom: 30px;
+          }
+
+          .card {
+              padding: 21px 18px;
+              border-radius: 13px;
+          }
+
+          .inputGrid {
+              grid-template-columns: 1fr;
+              gap: 0;
+          }
+
+          .courseCard {
+              padding: 15px;
+          }
+
+          .courseFields {
+              gap: 10px;
+          }
+
+          .courseFields input,
+          .courseFields select {
+              padding: 0 10px;
+          }
+
+          .resultValue {
+              font-size: 67px;
+          }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+          html {
+              scroll-behavior: auto;
+          }
+
+          * {
+              transition-duration: 0.01ms !important;
+          }
+      }
+  </style>
+</head>
+
+<body>
+
+<main id="container">
+
+  <header class="header">
+
+    <div class="headerTop">
+      <div class="brand">
+        <img class="brandMark" src="./icon.png" alt="">
+        GPA Calculator
+      </div>
+
+      <div class="scaleBadge">4.0 SCALE</div>
+    </div>
+
+    <div class="eyebrow">Academic Planning</div>
+
+    <h1>GPA Calculator</h1>
+
+    <p class="subtitle">
+      Calculate your anticipated cumulative GPA
+      based on your current academic record and expected grades.
+    </p>
+
+    <div class="headerLine"></div>
+
+  </header>
+
+  <section id="mainCard" class="card">
+
+    <div class="cardHeader">
+      <span class="sectionNumber">01</span>
+      <div>
+        <h2 class="sectionTitle">Academic Information</h2>
+        <p class="sectionDescription">
+          Enter your current academic details
+        </p>
+      </div>
+    </div>
+
+    <div class="inputGrid">
+
+      <div class="inputGroup">
+        <label for="comGPA">Cumulative GPA</label>
+        <input
+          type="number"
+          id="comGPA"
+          min="0"
+          max="4"
+          step="0.01"
+          inputmode="decimal"
+          placeholder="e.g. 3.50"
+        >
+      </div>
+
+      <div class="inputGroup">
+        <label for="comHours">Completed GPA Hours</label>
+        <input
+          type="number"
+          id="comHours"
+          min="0"
+          step="1"
+          inputmode="numeric"
+          placeholder="e.g. 60"
+        >
+      </div>
+
+    </div>
+
+    <div class="inputGroup">
+      <label for="numOfCourses">Number of Current Courses</label>
+      <input
+        type="number"
+        id="numOfCourses"
+        min="1"
+        max="30"
+        step="1"
+        inputmode="numeric"
+        placeholder="Enter number of courses"
+      >
+    </div>
+
+    <button id="createBtn" class="primaryButton" type="button">
+      Create Courses
+    </button>
+
+    <p id="errorMsg" role="alert"></p>
+
+  </section>
+
+  <section id="coursePanel" class="card">
+
+    <div class="cardHeader">
+      <span class="sectionNumber">02</span>
+      <div>
+        <h2 class="sectionTitle">Current Courses</h2>
+        <p class="sectionDescription">
+          Enter credit hours and expected grades
+        </p>
+      </div>
+    </div>
+
+    <div id="courseContainer"></div>
+
+  </section>
+
+  <div id="actionButtons">
+    <button id="calculateBtn" class="primaryButton" type="button">
+      Calculate GPA
+    </button>
+
+    <button id="clearBtn" class="secondaryButton" type="button">
+      Clear All
+    </button>
+  </div>
+
+  <section id="resultCard" aria-live="polite">
+    <div class="resultLabel">Anticipated Cumulative GPA</div>
+    <div class="resultValue" id="resultValue">0.00</div>
+    <div class="resultScale">Out of 4.00</div>
+    <div class="resultRule"></div>
+    <div class="resultNote">
+      Calculated using your completed credits and expected course grades.
+    </div>
+  </section>
+
+  <footer class="footer">
+    GPA CALCULATOR · ACADEMIC PLANNING
+  </footer>
+
+</main>
+
+<script>
+  const comGPAInput = document.getElementById('comGPA');
+  const comHoursInput = document.getElementById('comHours');
+  const numOfCoursesInput = document.getElementById('numOfCourses');
+
+  const createBtn = document.getElementById('createBtn');
+  const calculateBtn = document.getElementById('calculateBtn');
+  const clearBtn = document.getElementById('clearBtn');
+
+  const coursePanel = document.getElementById('coursePanel');
+  const courseContainer = document.getElementById('courseContainer');
+  const actionButtons = document.getElementById('actionButtons');
+  const errorMsg = document.getElementById('errorMsg');
+  const resultCard = document.getElementById('resultCard');
+  const resultValue = document.getElementById('resultValue');
+
+  const gradePoints = {
+    'A': 4,
+    'B+': 3.5,
+    'B': 3,
+    'C+': 2.5,
+    'C': 2,
+    'D+': 1.5,
+    'D': 1,
+    'F': 0
+  };
+
+  function gradeToPoints(grade) {
+    return gradePoints[grade] ?? 0;
+  }
+
+  function createCourses() {
+    const numOfCourses = Number(numOfCoursesInput.value);
+
+    errorMsg.textContent = '';
+    resultCard.style.display = 'none';
+    courseContainer.innerHTML = '';
+
+    if (
+      numOfCoursesInput.value === '' ||
+      !Number.isInteger(numOfCourses) ||
+      numOfCourses < 1 ||
+      numOfCourses > 30
+    ) {
+      errorMsg.textContent =
+        'Please enter a valid number of courses between 1 and 30.';
+
+      coursePanel.style.display = 'none';
+      actionButtons.style.display = 'none';
+      return;
+    }
+
+    for (let i = 0; i < numOfCourses; i++) {
+
+      const card = document.createElement('div');
+      card.className = 'courseCard';
+
+      const heading = document.createElement('div');
+      heading.className = 'courseHeading';
+
+      const title = document.createElement('span');
+      title.className = 'courseTitle';
+      title.textContent = 'Course ' + (i + 1);
+
+      const index = document.createElement('span');
+      index.className = 'courseIndex';
+      index.textContent = String(i + 1).padStart(2, '0');
+
+      heading.append(title, index);
+
+      const fields = document.createElement('div');
+      fields.className = 'courseFields';
+
+      const hoursGroup = document.createElement('div');
+      hoursGroup.className = 'inputGroup';
+
+      const hoursLabel = document.createElement('label');
+      hoursLabel.textContent = 'Credit Hours';
+      hoursLabel.htmlFor = 'hours-' + i;
+
+      const hoursInput = document.createElement('input');
+      hoursInput.type = 'number';
+      hoursInput.min = '1';
+      hoursInput.step = '1';
+      hoursInput.inputMode = 'numeric';
+      hoursInput.placeholder = 'e.g. 3';
+      hoursInput.id = 'hours-' + i;
+      hoursInput.className = 'creditHours';
+
+      hoursGroup.append(hoursLabel, hoursInput);
+
+      const gradeGroup = document.createElement('div');
+      gradeGroup.className = 'inputGroup';
+
+      const gradeLabel = document.createElement('label');
+      gradeLabel.textContent = 'Expected Grade';
+      gradeLabel.htmlFor = 'grade-' + i;
+
+      const gradeSelect = document.createElement('select');
+      gradeSelect.id = 'grade-' + i;
+      gradeSelect.className = 'grade';
+
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = 'Select Grade';
+      gradeSelect.appendChild(placeholder);
+
+      for (const grade of Object.keys(gradePoints)) {
+        const option = document.createElement('option');
+        option.value = grade;
+        option.textContent = grade;
+        gradeSelect.appendChild(option);
+      }
+
+      gradeGroup.append(gradeLabel, gradeSelect);
+      fields.append(hoursGroup, gradeGroup);
+      card.append(heading, fields);
+      courseContainer.appendChild(card);
+    }
+
+    coursePanel.style.display = 'block';
+    actionButtons.style.display = 'flex';
+  }
+
+  function calculateGPA() {
+    const comGPA = Number(comGPAInput.value);
+    let comHours = Number(comHoursInput.value);
+    let comPoints = comGPA * comHours;
+
+    const creditHours = document.querySelectorAll('.creditHours');
+    const grades = document.querySelectorAll('.grade');
+
+    errorMsg.textContent = '';
+    resultCard.style.display = 'none';
+
+    if (
+      comGPAInput.value === '' ||
+      !Number.isFinite(comGPA) ||
+      comGPA < 0 ||
+      comGPA > 4
+    ) {
+      errorMsg.textContent =
+        'Please enter a valid cumulative GPA between 0 and 4.';
+      return;
+    }
+
+    if (
+      comHoursInput.value === '' ||
+      !Number.isInteger(comHours) ||
+      comHours < 0
+    ) {
+      errorMsg.textContent = 'Please enter valid GPA hours.';
+      return;
+    }
+
+    if (comHours === 0 && comGPA !== 0) {
+      errorMsg.textContent =
+        'With zero completed credits, current GPA must be zero.';
+      return;
+    }
+
+    if (creditHours.length === 0) {
+      errorMsg.textContent = 'Please create the courses first.';
+      return;
+    }
+
+    for (let i = 0; i < creditHours.length; i++) {
+      const hours = Number(creditHours[i].value);
+      const grade = grades[i].value;
+
+      if (
+        creditHours[i].value === '' ||
+        !Number.isInteger(hours) ||
+        hours <= 0 ||
+        !Object.hasOwn(gradePoints, grade)
+      ) {
+        errorMsg.textContent =
+          'Please complete all course hours and grades.';
+        return;
+      }
+
+      comPoints += hours * gradeToPoints(grade);
+      comHours += hours;
+    }
+
+    const newGPA = comPoints / comHours;
+
+    resultValue.textContent = newGPA.toFixed(2);
+    resultCard.style.display = 'block';
+
+    resultCard.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest'
+    });
+  }
+
+  function clearAll() {
+    comGPAInput.value = '';
+    comHoursInput.value = '';
+    numOfCoursesInput.value = '';
+
+    courseContainer.innerHTML = '';
+    errorMsg.textContent = '';
+    resultValue.textContent = '0.00';
+
+    coursePanel.style.display = 'none';
+    actionButtons.style.display = 'none';
+    resultCard.style.display = 'none';
+  }
+
+  createBtn.addEventListener('click', createCourses);
+  calculateBtn.addEventListener('click', calculateGPA);
+  clearBtn.addEventListener('click', clearAll);
+
+  /* Register Service Worker for Offline Support */
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .catch(error => {
+          console.error('Service Worker registration failed:', error);
+        });
+    });
+  }
+</script>
+
+</body>
+</html>
